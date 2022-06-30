@@ -1,0 +1,65 @@
+version: "3"
+    
+services:
+  nginx:
+    build: ./requirements/nginx
+    container_name: nginx
+    volumes:
+      - wordpress_website:/var/www/html
+    ports:
+      - "80:80"
+      - "443:443"
+    depends_on:
+      - wordpress
+    networks:
+      - frontend
+    restart: always
+
+  wordpress:
+    build: ./requirements/wordpress
+    container_name: wordpress
+    volumes:
+      - wordpress_website:/var/www/html
+    expose:
+      - "9000"
+    depends_on:
+      - mariadb
+    env_file: 
+      - .env
+    networks:
+      - frontend
+      - backend
+    restart: "no"
+
+  mariadb:
+    build: ./requirements/mariadb
+    container_name: mariadb
+    volumes:
+      - website_database:/var/lib/mysql
+    expose:
+      - "3306"
+    env_file: 
+      - .env
+    networks:
+      - backend
+    restart: "no"
+
+volumes:
+  wordpress_website:
+    driver: local
+    driver_opts:
+      type: volume
+      o: bind
+      device: /home/mxu/data/site
+
+  website_database:
+    driver: local
+    driver_opts:
+      type: volume
+      o: bind
+      device: /home/mxu/data/database
+      
+networks:
+  frontend:
+  backend:
+  
